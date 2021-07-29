@@ -700,5 +700,35 @@ App now uses the new `RouteViewManager` component.
 </Router>
 ```
 
+## The Solution
+
+Run the solution go to **FetchData** and click on Edit a record.  You will see:
+
+![Clean Editor](./images/Clean-Editor.png)
+
+Save disabled, normal Exit and you can go where you want.
+
+Now Change the Temperature, and you will see:
+
+![Dirty Editor](./images/Dirty-Editor.png)
+
+Now Save is enabled and the Exit button has changed.
+
+Click on a menu link, or hit the browser back button:
+
+![Dirty Editor](./images/Dirty-Exit.png)
+
+You now get the Dirty Exit Challenge from `RouteViewManager`.  Check what happens on each action.
+
+Finally hit F5 to reload the page.
+
+![Dirty Editor](./images/Dirty-App-Exit.png)
+
+This time you get the browser challenge - the text depends on the specific browser - they all implement the challenge slightly differently.
+
+
+
+
+
 
 
