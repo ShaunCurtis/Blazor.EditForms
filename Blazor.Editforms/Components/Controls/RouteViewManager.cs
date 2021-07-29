@@ -19,7 +19,6 @@ using Microsoft.AspNetCore.Components.Web;
 using Microsoft.JSInterop;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 
@@ -35,7 +34,6 @@ namespace Blazor.SPA.Components
     {
         private bool _RenderEventQueued;
         private RenderHandle _renderHandle;
-        private bool _loadEditForm = false;
 
         [Parameter] public RouteData RouteData { get; set; }
 
@@ -45,30 +43,20 @@ namespace Blazor.SPA.Components
 
         [Inject] private IJSRuntime _js { get; set; }
 
-        /// <inheritdoc />
-        public void Attach(RenderHandle renderHandle)
-        {
-            _renderHandle = renderHandle;
-        }
+        [Inject] private NavigationManager NavManager { get; set; }
 
-        /// <inheritdoc />
+        public void Attach(RenderHandle renderHandle)
+            =>  _renderHandle = renderHandle;
+
         public async Task SetParametersAsync(ParameterView parameters)
         {
-            // Sets the component parameters
             parameters.SetParameterProperties(this);
-
-            // Check if we have or a EditForm
-            if (RouteData is null || EditStateService.EditForm is null)
-            {
+            if (RouteData is null && string.IsNullOrWhiteSpace(this.EditStateService.EditFormUrl))
                 throw new InvalidOperationException($"The {nameof(RouteView)} component requires a non-null value for the parameter {nameof(RouteData)}.");
-            }
-            // Render the component
+
             await this.RenderAsync();
         }
 
-        /// <summary>
-        ///  RenderFragment Delegate run when rendering the component
-        /// </summary>
         private RenderFragment _renderDelegate => builder =>
         {
             _RenderEventQueued = false;
@@ -90,12 +78,12 @@ namespace Blazor.SPA.Components
 
             builder.OpenComponent<LayoutView>(0);
             builder.AddAttribute(1, nameof(LayoutView.Layout), _pageLayoutType);
-            if (EditStateService.ConfirmDirtyExit && _loadEditForm is not true)
+            if (this.EditStateService.IsDirty && this.EditStateService.DoFormReload is not true)
                 builder.AddAttribute(2, nameof(LayoutView.ChildContent), _dirtyExitFragment);
             else
             {
-                _loadEditForm = false;
-                builder.AddAttribute(2, nameof(LayoutView.ChildContent), _renderComponentWithParameters);
+                this.EditStateService.DoFormReload = false;
+                builder.AddAttribute(3, nameof(LayoutView.ChildContent), _renderComponentWithParameters);
             }
             builder.CloseComponent();
         };
@@ -111,20 +99,20 @@ namespace Blazor.SPA.Components
                 builder.CloseElement();
             }
             {
-                builder.OpenElement(2, "div");
-                builder.AddAttribute(3, "class", "dirty-exit-message");
+                builder.OpenElement(5, "div");
+                builder.AddAttribute(6, "class", "dirty-exit-message");
                 {
-                    builder.OpenElement(2, "button");
-                    builder.AddAttribute(3, "class", "dirty-exit-button");
-                    builder.AddAttribute(5, "onclick", EventCallback.Factory.Create<MouseEventArgs>(this, this.DirtyExit));
-                    builder.AddContent(6, "Exit and Clear Unsaved Data");
+                    builder.OpenElement(7, "button");
+                    builder.AddAttribute(8, "class", "dirty-exit-button");
+                    builder.AddAttribute(9, "onclick", EventCallback.Factory.Create<MouseEventArgs>(this, this.DirtyExit));
+                    builder.AddContent(10, "Exit and Clear Unsaved Data");
                     builder.CloseElement();
                 }
                 {
-                    builder.OpenElement(2, "button");
-                    builder.AddAttribute(3, "class", "load-dirty-form-button");
-                    builder.AddAttribute(5, "onclick", EventCallback.Factory.Create<MouseEventArgs>(this, this.LoadDirtyForm));
-                    builder.AddContent(6, "Reload Form");
+                    builder.OpenElement(11, "button");
+                    builder.AddAttribute(12, "class", "load-dirty-form-button");
+                    builder.AddAttribute(13, "onclick", EventCallback.Factory.Create<MouseEventArgs>(this, this.LoadDirtyForm));
+                    builder.AddContent(14, "Reload Form");
                     builder.CloseElement();
                 }
                 builder.CloseElement();
@@ -140,16 +128,8 @@ namespace Blazor.SPA.Components
             Type componentType = null;
             IReadOnlyDictionary<string, object> parameters = new Dictionary<string, object>();
 
-            if (this.EditStateService.HasEditForm)
-            {
-                componentType = this.EditStateService.EditForm;
-            }
-            else 
-            {
-                componentType = RouteData.PageType;
-                parameters = RouteData.RouteValues;
-            }
-
+            componentType = RouteData.PageType;
+            parameters = RouteData.RouteValues;
             if (componentType != null)
             {
                 builder.OpenComponent(0, componentType);
@@ -161,8 +141,8 @@ namespace Blazor.SPA.Components
             }
             else
             {
-                builder.OpenElement(0, "div");
-                builder.AddContent(1, "No Route or View Configured to Display");
+                builder.OpenElement(2, "div");
+                builder.AddContent(3, "No Route or View Configured to Display");
                 builder.CloseElement();
             }
         };
@@ -188,10 +168,10 @@ namespace Blazor.SPA.Components
             return RenderAsync();
         }
 
-        private Task LoadDirtyForm(MouseEventArgs d)
+        private void LoadDirtyForm(MouseEventArgs e)
         {
-            _loadEditForm = true;
-            return RenderAsync();
+            this.EditStateService.DoFormReload = true;
+            NavManager.NavigateTo(this.EditStateService.EditFormUrl);
         }
 
         private void SetPageExitCheck(bool action)

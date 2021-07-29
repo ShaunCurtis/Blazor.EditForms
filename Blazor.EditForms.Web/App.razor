@@ -1,6 +1,8 @@
+@using Blazor.SPA.Components
+
 <Router AppAssembly="@typeof(Program).Assembly" PreferExactMatches="@true">
     <Found Context="routeData">
-        <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+        <RouteViewManager RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
     </Found>
     <NotFound>
         <LayoutView Layout="@typeof(MainLayout)">

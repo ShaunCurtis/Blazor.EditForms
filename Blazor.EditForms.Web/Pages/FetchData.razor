@@ -31,7 +31,7 @@ else
                     <td>@forecast.TemperatureF</td>
                     <td>@forecast.Summary</td>
                     <td>
-                        <button class="button btn-primary" @onclick="() => EditRecord(forecast.ID)">Edit</button>
+                        <button class="btn btn-primary" @onclick="() => EditRecord(forecast.ID)">Edit</button>
                     </td>
                 </tr>
             }
@@ -53,15 +53,11 @@ else
     }
 
     private void OnListUpdated(object sender, EventArgs e)
-    {
-        this.InvokeAsync(StateHasChanged);
-    }
+            => this.InvokeAsync(StateHasChanged);
 
     private void EditRecord(Guid id)
-    => this.NavManager.NavigateTo($"/WeatherEditor/{id}");
+        => this.NavManager.NavigateTo($"/WeatherEditor/{id}");
 
     public void Dispose()
-    {
-        this.ViewService.ListChanged -= this.OnListUpdated;
-    }
+        =>  this.ViewService.ListChanged -= this.OnListUpdated;
 }

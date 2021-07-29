@@ -5,7 +5,13 @@ VisualStudioVersion = 16.0.31112.23
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Blazor.EditForms.Web", "Blazor.EditForms.Web\Blazor.EditForms.Web.csproj", "{A338C2EC-196F-4F1B-8928-1706E7910222}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blazor.Editforms", "Blazor.Editforms\Blazor.Editforms.csproj", "{E450013E-F8CF-4219-BC52-341B7343085D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Blazor.Editforms", "Blazor.Editforms\Blazor.Editforms.csproj", "{E450013E-F8CF-4219-BC52-341B7343085D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{D3F6CE9B-A078-44D8-AD6C-66A98C1DE5E6}"
+	ProjectSection(SolutionItems) = preProject
+		readme.md = readme.md
+		images\RouteViewManager.png = images\RouteViewManager.png
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

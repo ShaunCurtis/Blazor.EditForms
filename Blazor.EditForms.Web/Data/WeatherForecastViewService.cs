@@ -1,4 +1,10 @@
-﻿using System;
+﻿/// ============================================================
+/// Author: Shaun Curtis, Cold Elm Coders
+/// License: Use And Donate
+/// If you use it, donate something to a charity somewhere
+/// ============================================================
+
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -16,7 +22,6 @@ namespace Blazor.EditForms.Web.Data
             {
                 this._records = value;
                 ListChanged?.Invoke(this, EventArgs.Empty);
-
             }
         }
 
@@ -37,24 +42,15 @@ namespace Blazor.EditForms.Web.Data
         public event EventHandler ListChanged;
 
         public WeatherForecastViewService(WeatherForecastDataService dataService)
-        {
-            this.DataService = dataService;
-        }
+            => this.DataService = dataService;
 
         public async ValueTask GetWeatherForcastsAsync()
-        {
-            this.Records = await DataService.GetWeatherForcastsAsync();
-        }
+            => this.Records = await DataService.GetWeatherForcastsAsync();
 
         public async ValueTask<bool> UpdateRecordAsync()
-        {
-            return await DataService.SaveWeatherForcastAsync(this.Record);
-        }
+            =>  await DataService.SaveWeatherForcastAsync(this.Record);
 
-        public async ValueTask<bool> GetRecordAsync(Guid id)
-        {
-            this.Record = await DataService.GetWeatherForcastAsync(id);
-            return this.Record is not null;
-        }
+        public async ValueTask GetRecordAsync(Guid id)
+            => this.Record = await DataService.GetWeatherForcastAsync(id);
     }
 }

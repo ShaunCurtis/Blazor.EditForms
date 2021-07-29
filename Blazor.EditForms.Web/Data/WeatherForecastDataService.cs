@@ -18,10 +18,17 @@ namespace Blazor.EditForms.Web.Data
             =>  WeatherForecasts = GetForecasts();
 
         public ValueTask<List<WeatherForecast>> GetWeatherForcastsAsync()
-            => ValueTask.FromResult<List<WeatherForecast>>(WeatherForecasts);
+        {
+            var list = new List<WeatherForecast>();
+            WeatherForecasts.ForEach(item => list.Add(item.Copy()));
+            return ValueTask.FromResult<List<WeatherForecast>>(list);
+        }
 
         public ValueTask<WeatherForecast> GetWeatherForcastAsync(Guid id)
-            => ValueTask.FromResult<WeatherForecast>(WeatherForecasts.FirstOrDefault(item => item.ID == id));
+        { 
+            var record =  WeatherForecasts.FirstOrDefault(item => item.ID == id);
+            return ValueTask.FromResult<WeatherForecast>(record.Copy());
+        }
 
         public ValueTask<bool> SaveWeatherForcastAsync(WeatherForecast record)
         {
@@ -34,7 +41,6 @@ namespace Blazor.EditForms.Web.Data
             }
             return ValueTask.FromResult<bool>(rec != default);
         }
-
 
         private List<WeatherForecast> GetForecasts()
         {

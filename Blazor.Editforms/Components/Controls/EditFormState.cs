@@ -8,6 +8,7 @@ using Blazor.EditForms.Data;
 using Blazor.EditForms.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
+using Microsoft.JSInterop;
 using System;
 using System.Diagnostics;
 using System.Text.Json;
@@ -30,25 +31,38 @@ namespace Blazor.EditForms.Components
 
         [Inject] private EditStateService EditStateService { get; set; }
 
+        [Inject] private IJSRuntime _js { get; set; }
+
         public bool IsDirty => EditFields?.IsDirty ?? false;
 
-        private Guid FormId => EditStateService.EditFormId;
-
-
-        protected async override Task OnInitializedAsync()
+        protected override Task OnInitializedAsync()
         {
             Debug.Assert(this.EditContext != null);
 
             if (this.EditContext != null)
             {
                 // Populates the EditField Collection
-                await this.GetEditStateValues();
+                this.LoadEditState();
                 // Wires up to the EditContext OnFieldChanged event
                 this.EditContext.OnFieldChanged += FieldChanged;
             }
+            return Task.CompletedTask;
         }
 
-        protected async void GetEditFields(object model, object editedsource = null)
+        private void LoadEditState()
+        {
+            object data = null;
+            var recordtype = this.EditContext.Model.GetType();
+            if (EditStateService.IsDirty && !string.IsNullOrWhiteSpace(EditStateService.Data))
+                data = JsonSerializer.Deserialize(EditStateService.Data, recordtype);
+
+            this.GetEditFields(this.EditContext.Model, data);
+            this.SetModelToEditState(this.EditContext.Model);
+            if (EditFields.IsDirty)
+                this.EditStateChanged.InvokeAsync(true);
+        }
+
+        private void GetEditFields(object model, object editedsource = null)
         {
             // Gets the fields from the model
             this.EditFields.Clear();
@@ -57,8 +71,11 @@ namespace Blazor.EditForms.Components
                 var props = model.GetType().GetProperties();
                 foreach (var prop in props)
                 {
-                    var value = prop.GetValue(model);
-                    EditFields.AddField(model, prop.Name, value);
+                    if (prop.CanWrite)
+                    {
+                        var value = prop.GetValue(model);
+                        EditFields.AddField(model, prop.Name, value);
+                    }
                 }
             }
             // Update the fields with the values from the source
@@ -76,9 +93,17 @@ namespace Blazor.EditForms.Components
                     }
                 }
             }
-            // Update the edit state if we're dirty
-            if (EditFields.IsDirty)
-                await this.EditStateChanged.InvokeAsync(true);
+        }
+
+        private void SetModelToEditState(object model)
+        {
+            var props = model.GetType().GetProperties();
+            foreach (var property in props)
+            {
+                var value = EditFields.GetEditValue(property.Name);
+                if (value is not null && property.CanWrite)
+                    property.SetValue(model, value);
+            }
         }
 
         private async void FieldChanged(object sender, FieldChangedEventArgs e)
@@ -105,22 +130,22 @@ namespace Blazor.EditForms.Components
             }
         }
 
-        public void SetModelToEditState(object model)
+        private void SaveEditState()
         {
-            var props = model.GetType().GetProperties();
-            foreach (var property in props)
-            {
-                var value = EditFields.GetEditValue(property.Name);
-                if (value is not null && property.CanWrite)
-                    property.SetValue(model, value);
-            }
+            this.SetPageExitCheck(true);
+            var jsonData = JsonSerializer.Serialize(this.EditContext.Model);
+            EditStateService.SetEditState(jsonData);
         }
 
-        public void UpdateState()
+        private void ClearEditState()
         {
-            this.GetEditFields(this.EditContext.Model);
-            this.EditStateChanged.InvokeAsync(EditFields?.IsDirty ?? false);
+            this.SetPageExitCheck(false);
+            EditStateService.ClearEditState();
         }
+
+        private void SetPageExitCheck(bool action)
+            => _js.InvokeAsync<bool>("cecblazor_setEditorExitCheck", action);
+
 
         // IDisposable Implementation
         protected virtual void Dispose(bool disposing)
@@ -135,39 +160,6 @@ namespace Blazor.EditForms.Components
                 disposedValue = true;
             }
         }
-
-        protected void SaveEditState()
-        {
-            if (!this.FormId.Equals(Guid.Empty))
-            {
-                var json = JsonSerializer.Serialize(this.EditContext.Model);
-                var data = new EditStateData { Data = json, FormId = this.FormId };
-                EditStateService.AddEditState(data);
-            }
-        }
-
-        public void ClearEditState()
-        {
-            EditStateService.ClearEditState();
-        }
-
-        protected async ValueTask<bool> GetEditStateValues()
-        {
-            object data = null;
-            var recordtype = this.EditContext.Model.GetType();
-            var rec = EditStateService.GetEditState();
-            var hasRecord = rec != null;
-            if (hasRecord)
-                data = JsonSerializer.Deserialize(rec.Data, recordtype);
-
-            this.GetEditFields(this.EditContext.Model, data);
-            this.SetModelToEditState(this.EditContext.Model);
-            if (EditFields.IsDirty)
-                await this.EditStateChanged.InvokeAsync(true);
-
-            return hasRecord;
-        }
-
 
         public void Dispose()
         {

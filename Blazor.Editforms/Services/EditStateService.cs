@@ -4,64 +4,45 @@
 /// If you use it, donate something to a charity somewhere
 /// ============================================================
 
-using Blazor.EditForms.Data;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Blazor.EditForms.Services
 {
     /// <summary>
-    /// Service Class for managing Cusotm Routes and Runtime Layout Changes
+    /// Service Class for managing Form Edit State
     /// </summary>
     public class EditStateService
     {
-        private double garbageCollectionMinutes = -15;
+        public object RecordID { get; set; }
 
-        public Guid EditFormId { get; set; }
+        public bool IsDirty { get; set; }
 
-        public Type EditForm { get; set; }
+        public string Data { get; set; }
 
-        public bool ConfirmDirtyExit => EditForm is not null;
+        public string EditFormUrl { get; set; }
 
-        public bool HasEditForm => EditForm is not null;
+        public bool ShowEditForm => (!String.IsNullOrWhiteSpace(EditFormUrl)) && IsDirty;
 
-        public List<EditStateData> EditStates { get; private set; } = new List<EditStateData>();
+        public bool DoFormReload { get; set; }
 
-        public void AddEditState(EditStateData data)
+        public void SetEditState(string data)
         {
-            ClearEditStateGarbage();
-            if (this.EditStates.Any(item => item.FormId == data.FormId))
-            {
-                var rec = this.EditStates.FirstOrDefault(item => item.FormId == data.FormId);
-                EditStates.Remove(rec);
-            }
-            EditStates.Add(data);
+            this.Data = data;
+            this.IsDirty = true;
         }
 
-        public EditStateData GetEditState()
+        public void ClearEditState()
         {
-            ClearEditStateGarbage();
-            return this.EditStates.FirstOrDefault(item => item.FormId == this.EditFormId);
+            this.Data = null;
+            this.IsDirty = false;
         }
 
-        public bool ClearEditState()
+        public void ResetEditState()
         {
-            ClearEditStateGarbage();
-            var rec = this.EditStates.FirstOrDefault(item => item.FormId == this.EditFormId);
-            var isRecord = rec != null;
-            if (isRecord)
-                EditStates.Remove(rec);
-
-            this.EditForm = null;
-            this.EditFormId = Guid.Empty;
-            return isRecord;
-        }
-
-        private void ClearEditStateGarbage()
-        {
-            var list = EditStates.Where(item => item.DateStamp < DateTimeOffset.Now.AddMinutes(garbageCollectionMinutes)).ToList();
-            list?.ForEach(item => EditStates.Remove(item));
+            this.RecordID = null;
+            this.Data = null;
+            this.IsDirty = false;
+            this.EditFormUrl = string.Empty;
         }
     }
 }

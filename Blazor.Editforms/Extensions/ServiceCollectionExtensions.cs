@@ -14,7 +14,6 @@ namespace Blazor.EditForms.Extensions
         public static IServiceCollection AddBlazorForms(this IServiceCollection services)
         {
             services.AddScoped<EditStateService>();
-
             return services;
         }
     }
