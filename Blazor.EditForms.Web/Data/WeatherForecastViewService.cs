@@ -48,7 +48,11 @@ namespace Blazor.EditForms.Web.Data
             => this.Records = await DataService.GetWeatherForcastsAsync();
 
         public async ValueTask<bool> UpdateRecordAsync()
-            =>  await DataService.SaveWeatherForcastAsync(this.Record);
+        { 
+            var result = await DataService.SaveWeatherForcastAsync(this.Record);
+            RecordChanged?.Invoke(this, EventArgs.Empty);
+            return result;
+        }
 
         public async ValueTask GetRecordAsync(Guid id)
             => this.Record = await DataService.GetWeatherForcastAsync(id);

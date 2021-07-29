@@ -34,6 +34,7 @@ public class EditStateService
     public string EditFormUrl { get; set; }
     public bool ShowEditForm => (!String.IsNullOrWhiteSpace(EditFormUrl)) && IsDirty;
     public bool DoFormReload { get; set; }
+    public event EventHandler RecordSaved;
 
     public void SetEditState(string data)
     {
@@ -54,6 +55,9 @@ public class EditStateService
         this.IsDirty = false;
         this.EditFormUrl = string.Empty;
     }
+
+    public void NotifyRecordSaved()
+        => RecordSaved?.Invoke(this, EventArgs.Empty);
 }
 ```
 
@@ -668,7 +672,10 @@ public partial class WeatherEditor : IDisposable
         =>  this.InvokeAsync(StateHasChanged);
 
     private async Task SaveRecord()
-        =>  await this.ViewService.UpdateRecordAsync();
+    {
+        await this.ViewService.UpdateRecordAsync();
+        this.EditStateService.NotifyRecordSaved();
+    }
 
     private void Exit()
     {

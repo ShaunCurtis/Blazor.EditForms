@@ -25,6 +25,8 @@ namespace Blazor.EditForms.Services
 
         public bool DoFormReload { get; set; }
 
+        public event EventHandler RecordSaved;
+
         public void SetEditState(string data)
         {
             this.Data = data;
@@ -44,5 +46,8 @@ namespace Blazor.EditForms.Services
             this.IsDirty = false;
             this.EditFormUrl = string.Empty;
         }
+
+        public void NotifyRecordSaved()
+            => RecordSaved?.Invoke(this, EventArgs.Empty);
     }
 }

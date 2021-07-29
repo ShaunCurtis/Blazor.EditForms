@@ -44,7 +44,8 @@ namespace Blazor.EditForms.Components
                 // Populates the EditField Collection
                 this.LoadEditState();
                 // Wires up to the EditContext OnFieldChanged event
-                this.EditContext.OnFieldChanged += FieldChanged;
+                this.EditContext.OnFieldChanged += this.FieldChanged;
+                this.EditStateService.RecordSaved += this.OnSave;
             }
             return Task.CompletedTask;
         }
@@ -146,6 +147,11 @@ namespace Blazor.EditForms.Components
         private void SetPageExitCheck(bool action)
             => _js.InvokeAsync<bool>("cecblazor_setEditorExitCheck", action);
 
+        private void OnSave(object sender, EventArgs e)
+        {
+            this.ClearEditState();
+            this.LoadEditState();
+        }
 
         // IDisposable Implementation
         protected virtual void Dispose(bool disposing)
@@ -157,6 +163,7 @@ namespace Blazor.EditForms.Components
                     if (this.EditContext != null)
                         this.EditContext.OnFieldChanged -= this.FieldChanged;
                 }
+                this.EditStateService.RecordSaved -= this.OnSave;
                 disposedValue = true;
             }
         }

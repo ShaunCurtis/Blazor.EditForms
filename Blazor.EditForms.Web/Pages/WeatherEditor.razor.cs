@@ -49,7 +49,10 @@ namespace Blazor.EditForms.Web.Pages
             =>  this.InvokeAsync(StateHasChanged);
 
         private async Task SaveRecord()
-            =>  await this.ViewService.UpdateRecordAsync();
+        {
+            await this.ViewService.UpdateRecordAsync();
+            this.EditStateService.NotifyRecordSaved();
+        }
 
         private void Exit()
         {
