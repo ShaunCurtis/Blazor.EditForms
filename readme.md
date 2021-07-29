@@ -1,12 +1,12 @@
 # Managing Form Edit State in Blazor
 
-You've edited some data in a form.  At some point you inadvertently click on a link in the navigation bar, click the back button, hit a favourite link.  Do you really want to exit the form and go to where you've told the browser to go to.  Maybe, maybe not.  What you probably do want is to be warned you have unsaved data, and asked if you want to leave or go back to your form.
+You've edited data in a form.  You inadvertently click on a link in the navigation bar, click the back button, hit a favourite link.  Do you really want to exit the form and go to where you've told the browser to go to.  Maybe, maybe not.  What you probably want is to be warned about your unsaved data, and given the option to return or discard.
 
 This Repo shows how to implement just that in Blazor.
 
 ## Form Exits
 
-There are three (controlled) ways that a user can exit a form:
+There are three (controlled) ways a user can exit a form:
 1. Intra Form Navigation - Clicking on an Exit button within the Form.
 2. Intra Application Navigation - Clicking on a link in a navigation bar outside the form, clicking on the forward or back buttons on the browser.
 3. Extra Application Navigation - entering a new Url in the address bar, clicking on a favourite, closing the browser Tab or application.
