@@ -2,6 +2,9 @@
 
 You've edited data in a form.  You inadvertently click on a link in the navigation bar, click the back button, hit a favourite link.  Do you really want to exit the form and go to where you've told the browser to go to.  Maybe, maybe not.  What you probably want is to be warned about your unsaved data, and given the option to return or discard.
 
+![Dirty Editor](./images/Dirty-Exit.png)
+
+
 This Repo shows how to implement just that in Blazor.
 
 ## Form Exits
